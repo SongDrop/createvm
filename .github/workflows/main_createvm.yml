@@ -120,8 +120,5 @@ jobs:
  
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B42C9D39569D44A79650994B2D2A9E9F }}
  
-          scm-do-build-during-deployment: false  # Skip Oryx build since dependencies are included
- 
-          enable-oryx-build: false
 
  
