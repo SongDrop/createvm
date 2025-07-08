@@ -76,7 +76,7 @@ async def provision_vm(req: func.HttpRequest) -> func.HttpResponse:
         # Set parameters with defaults for optional values
         pc_name = ''.join(random.choices(string.ascii_lowercase, k=6))
         domain = req_body.get('domain')
-        subdomain = req_body.get('subdomain', pc_name)
+        subdomain = pc_name
         resource_group = req_body.get('resource_group')
         vm_name = req_body.get('vm_name', pc_name)
         location = req_body.get('location')
