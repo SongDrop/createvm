@@ -40,18 +40,10 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install and force-copy dependencies
+      - name: Copy dependencies to site-packages
         run: |
-          # Create target dir with correct permissions
-          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
-          chmod -R 777 .python_packages
-          
-          # COPY EVERYTHING WITH FORCE
-          cp -rf venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-          
-          # Verify with extreme prejudice
-          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/ > package_list.txt
-          cat package_list.txt
+          mkdir -p site-packages
+          cp -r venv/lib/python3.12/site-packages/* site-packages/
     
       # Optional: Add step to run tests here
 
