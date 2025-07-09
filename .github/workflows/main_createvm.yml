@@ -37,11 +37,27 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Prepare .python_packages directory
+      - name: Prepare .python_packages directory with version-specific path
         run: |
+          # Create the exact target directory structure
           mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
-          cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-     
+          
+          # Copy all packages while preserving the Python version path
+          if [ -d "venv/lib/python${{ env.PYTHON_VERSION }}/site-packages" ]; then
+            cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* \
+                  .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+          fi
+          
+          # Handle Windows case if needed (for cross-platform compatibility)
+          if [ -d "venv/Lib/site-packages" ]; then
+            cp -r venv/Lib/site-packages/* \
+                  .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+          fi
+          
+          # Verify the copy
+          echo "Copied packages:"
+          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+          
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
