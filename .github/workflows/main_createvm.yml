@@ -34,14 +34,19 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install and force-copy dependencies
+      - name: Install dependencies directly to target directory
         run: |
-          # Create virtual environment
-          python -m venv venv
-          source venv/bin/activate
+          # Create target directory for Azure Functions
+          mkdir -p .python_packages/lib/site-packages
           
-          # Install requirements
-          pip install --target="./.python_packages/lib/site-packages" -r requirements.txt
+          # Install packages to Azure Functions location
+          pip install \
+            --target="./.python_packages/lib/site-packages" \
+            -r requirements.txt
+          
+          # Verify dotenv installed
+          echo "Installed packages:"
+          ls -la .python_packages/lib/site-packages | grep dotenv
      
       # Optional: Add step to run tests here
 
