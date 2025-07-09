@@ -48,7 +48,12 @@ jobs:
           echo "Copied packages:"
           ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
 
-    
+      - name: Prepare Python dependencies
+        run: |
+          # Create the exact folder structure Azure Functions expects
+          mkdir -p .python_packages/lib/python3.12/site-packages
+          cp -r venv/lib/python3.12/site-packages/* .python_packages/lib/python3.12/site-packages/
+
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
