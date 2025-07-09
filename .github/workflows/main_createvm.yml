@@ -36,17 +36,36 @@ jobs:
 
       - name: Install dependencies directly to target directory
         run: |
-          # Create target directory for Azure Functions
-          mkdir -p .python_packages/lib/site-packages
+          # Upgrade pip and install requirements
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install and force-copy dependencies
+        run: |
+          # Clean previous installations
+
+          # Verify dotenv installed in venv
+          echo "VENV PACKAGES:"
+          ls -la venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/ | grep dotenv
           
-          # Install packages to Azure Functions location
-          pip install \
-            --target="./.python_packages/lib/site-packages" \
-            -r requirements.txt
+          # Create target directory
+          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
           
-          # Verify dotenv installed
-          echo "Installed packages:"
-          ls -la .python_packages/lib/site-packages | grep dotenv
+          # Copy all packages with force
+          cp -rf venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+          
+          # Handle lib64 if exists
+          if [ -d "venv/lib64/python${{ env.PYTHON_VERSION }}/site-packages" ]; then
+            cp -rf venv/lib64/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+          fi
+          
+          # Verify dotenv copied to target
+          echo "TARGET PACKAGES:"
+          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/ | grep dotenv
+          
+          # Create file list for debugging
+          find .python_packages -type f > file-list.txt
+          cat file-list.txt
      
       # Optional: Add step to run tests here
 
