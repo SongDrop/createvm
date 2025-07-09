@@ -40,12 +40,15 @@ jobs:
 
       - name: Copy dependencies to site-packages
         run: |
-          mkdir -p site-packages
-          cp -r venv/lib/python3.12/site-packages/* site-packages/
+          mkdir -p .python_packages/lib/python3.12/site-packages
+          cp -r venv/lib/python3.12/site-packages/* .python_packages/lib/python3.12/site-packages/
 
       - name: Zip artifact for deployment
         run: |
-          zip release.zip function_app.py requirements.txt host.json site-packages -r
+          # Include all files except venv and git files
+          find . -type f -not -path './venv/*' -not -path './.git/*' -not -path './.python_packages/*' | zip release.zip -@
+          # Add the dependencies with correct Python path structure
+          zip -r release.zip .python_packages
 
       - name: Verify zip contents
         run: unzip -l release.zip
