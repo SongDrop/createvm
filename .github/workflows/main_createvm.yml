@@ -1,6 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-# More info on Python, GitHub Actions, and Azure Functions: https://aka.ms/python-webapps-actions
+# Docs for Azure Functions action: https://github.com/Azure/functions-action
 
 name: Build and deploy Python project to Azure Function App - createvm
 
@@ -11,62 +9,60 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  PYTHON_VERSION: '3.12' # set this to the python version to use (supports 3.6, 3.7, 3.8)
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'deploy_dir' # Where deployment package will be extracted
+  PYTHON_VERSION: '3.12'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Python version
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Create and start virtual environment
+      - name: Create and activate virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Optional: Add step to run tests here
-
-      - name: Prepare Python dependencies
+      - name: Prepare Python dependencies for Azure Functions
         run: |
-          # Create the exact folder structure Azure Functions expects
-          mkdir -p .python_packages/lib/python3.12/site-packages
-          cp -r venv/lib/python3.12/site-packages/* .python_packages/lib/python3.12/site-packages/
-     
-      - name: Create deployment package
-        run: |
-          # Create zip directly (no staging needed)
-          zip -r release.zip . -x 'venv/*' '.git/*' '.python_packages/*'
-          zip -r release.zip .python_packages
+          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
+          cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
 
-      - name: Verify zip contents
+      - name: Create deployment zip package
+        run: |
+          mkdir staging
+          cp -r ./* staging/
+          cp -r .python_packages staging/
+          cd staging
+          zip -r ../release.zip .
+      
+      - name: Show contents of zip (debug)
         run: |
           unzip -l release.zip
           echo "Zip file size: $(du -h release.zip | cut -f1)"
-        
-      - name: Upload artifact for deployment job
+
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: |
-            release.zip
-            !venv/
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
@@ -74,17 +70,16 @@ jobs:
           name: python-app
 
       - name: Unzip artifact for deployment
-        run: unzip release.zip     
-        
-      - name: 'Deploy to Azure Functions'
+        run: |
+          mkdir ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          unzip release.zip -d ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+
+      - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
-        id: deploy-to-function
         with:
-          app-name: 'createvm'
+          app-name: 'createvm' # Replace with your Function App name
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0E89E86104924CEDBBC83ED8B62BB8B9 }}
-          sku: 'flexconsumption'
-          scm-do-build-during-deployment: true
-          enable-oryx-build: true
-        
+          scm-do-build-during-deployment: false
+          enable-oryx-build: false
