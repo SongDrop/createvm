@@ -42,14 +42,17 @@ jobs:
 
       - name: Install and force-copy dependencies
         run: |
-          # BLUNT FORCE COPY - this is what you're asking for
+          # Create target dir with correct permissions
           mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
-          cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-
-          # Verify the copy worked
-          echo "Copied packages:"
-          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-     
+          chmod -R 777 .python_packages
+          
+          # COPY EVERYTHING WITH FORCE
+          cp -rf venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+          
+          # Verify with extreme prejudice
+          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/ > package_list.txt
+          cat package_list.txt
+    
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
