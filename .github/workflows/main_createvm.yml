@@ -42,7 +42,7 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           mkdir -p site-packages
-          cp -r venv/lib/python3.12/site-packages/* site-packages/
+          cp -r venv/lib/python3.13/site-packages/* site-packages/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
