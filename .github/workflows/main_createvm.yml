@@ -37,15 +37,8 @@ jobs:
       - name: Install dependencies directly to target directory
         run: |
           # Upgrade pip and install requirements
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install --target=.python_packages/lib/python3.12/site-packages -r requirements.txt
           
-      - name: Prepare Python dependencies
-        run: |
-          # Create the exact folder structure Azure Functions expects
-          mkdir -p .python_packages/lib/python3.12/site-packages
-          cp -r venv/lib/python3.12/site-packages/* .python_packages/lib/python3.12/site-packages/
-
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
