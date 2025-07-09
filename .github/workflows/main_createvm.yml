@@ -34,10 +34,11 @@ jobs:
           python -m venv venv
           source venv/bin/activate
 
-      - name: Install dependencies directly to target directory
+      - name: Install dependencies directly to .python_packages
         run: |
-          # Upgrade pip and install requirements
-          pip install --target=.python_packages/lib/python3.12/site-packages -r requirements.txt
+          mkdir -p .python_packages/lib/python3.12/site-packages
+          pip install -r requirements.txt --target=.python_packages/lib/python3.12/site-packages
+
           
       # Optional: Add step to run tests here
 
