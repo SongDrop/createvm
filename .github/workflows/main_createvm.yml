@@ -41,15 +41,7 @@ jobs:
           source venv/bin/activate
           
           # Install requirements
-          pip install -r requirements.txt
-          
-          # BLUNT FORCE COPY - this is what you're asking for
-          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
-          cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-          
-          # Verify the copy worked
-          echo "Copied packages:"
-          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+          pip install --target="./.python_packages/lib/site-packages" -r requirements.txt
      
       # Optional: Add step to run tests here
 
