@@ -31,7 +31,7 @@ from azure.mgmt.dns.models import RecordSet
 from azure.mgmt.storage import StorageManagementClient
 
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 @app.route(route="createvm")
 def createvm(req: func.HttpRequest) -> func.HttpResponse:
