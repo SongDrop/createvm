@@ -42,29 +42,30 @@ jobs:
 
       - name: Install and force-copy dependencies
         run: |
-          # Clean previous installations
-
           # Verify dotenv installed in venv
           echo "VENV PACKAGES:"
           ls -la venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/ | grep dotenv
           
-          # Create target directory
-          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
+          # Create target directory structure
+          mkdir -p .python_packages/lib/site-packages
           
           # Copy all packages with force
-          cp -rf venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+          echo "Copying from venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/"
+          cp -rf venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/site-packages/
           
-          # Handle lib64 if exists
+          # Handle lib64 directory if exists
           if [ -d "venv/lib64/python${{ env.PYTHON_VERSION }}/site-packages" ]; then
-            cp -rf venv/lib64/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+            echo "Copying from venv/lib64/python${{ env.PYTHON_VERSION }}/site-packages/"
+            cp -rf venv/lib64/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/site-packages/
           fi
           
           # Verify dotenv copied to target
           echo "TARGET PACKAGES:"
-          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/ | grep dotenv
+          ls -la .python_packages/lib/site-packages/ | grep dotenv
           
-          # Create file list for debugging
+          # Create complete file list for debugging
           find .python_packages -type f > file-list.txt
+          echo "FILE LIST:"
           cat file-list.txt
      
       # Optional: Add step to run tests here
