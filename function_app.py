@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import time
+import logging
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 load_dotenv()  # This loads environment variables from a .env file in the current directory
