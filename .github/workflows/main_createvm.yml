@@ -36,7 +36,8 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
+             cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+     
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
