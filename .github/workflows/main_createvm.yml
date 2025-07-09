@@ -38,17 +38,28 @@ jobs:
 
       # Optional: Add step to run tests here
 
-      - name: Copy dependencies to site-packages
+      - name: Prepare Python dependencies
         run: |
+          # Create the exact folder structure Azure Functions expects
           mkdir -p .python_packages/lib/python3.12/site-packages
           cp -r venv/lib/python3.12/site-packages/* .python_packages/lib/python3.12/site-packages/
 
-      - name: Zip artifact for deployment
+      - name: Create deployment package
         run: |
-          # Include all files except venv and git files
-          find . -type f -not -path './venv/*' -not -path './.git/*' -not -path './.python_packages/*' | zip release.zip -@
-          # Add the dependencies with correct Python path structure
-          zip -r release.zip .python_packages
+          # Create a staging directory with correct structure
+          mkdir -p staging
+          
+          # Copy all project files except excluded directories
+          rsync -a --exclude='venv' --exclude='.git' --exclude='.python_packages' --exclude='staging' . staging/
+          
+          # Move python packages to correct location in staging
+          mv .python_packages staging/
+          
+          # Create zip with all contents in staging
+          cd staging && zip -r ../release.zip .
+          
+          # Clean up
+          cd .. && rm -rf staging .python_packages
 
       - name: Verify zip contents
         run: unzip -l release.zip
