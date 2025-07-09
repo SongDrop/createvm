@@ -43,26 +43,17 @@ jobs:
           # Create the exact folder structure Azure Functions expects
           mkdir -p .python_packages/lib/python3.12/site-packages
           cp -r venv/lib/python3.12/site-packages/* .python_packages/lib/python3.12/site-packages/
-
+     
       - name: Create deployment package
         run: |
-          # Create a staging directory with correct structure
-          mkdir -p staging
-          
-          # Copy all project files except excluded directories
-          rsync -a --exclude='venv' --exclude='.git' --exclude='.python_packages' --exclude='staging' . staging/
-          
-          # Move python packages to correct location in staging
-          mv .python_packages staging/
-          
-          # Create zip with all contents in staging
-          cd staging && zip -r ../release.zip .
-          
-          # Clean up
-          cd .. && rm -rf staging .python_packages
+          # Create zip directly (no staging needed)
+          zip -r release.zip . -x 'venv/*' '.git/*' '.python_packages/*'
+          zip -r release.zip .python_packages
 
       - name: Verify zip contents
-        run: unzip -l release.zip
+        run: |
+          unzip -l release.zip
+          echo "Zip file size: $(du -h release.zip | cut -f1)"
         
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
