@@ -37,27 +37,19 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Prepare .python_packages directory with version-specific path
+      - name: Verify venv packages
         run: |
-          # Create the exact target directory structure
-          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
-          
-          # Copy all packages while preserving the Python version path
-          if [ -d "venv/lib/python${{ env.PYTHON_VERSION }}/site-packages" ]; then
-            cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* \
-                  .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-          fi
-          
-          # Handle Windows case if needed (for cross-platform compatibility)
-          if [ -d "venv/Lib/site-packages" ]; then
-            cp -r venv/Lib/site-packages/* \
-                  .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-          fi
-          
-          # Verify the copy
-          echo "Copied packages:"
-          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-          
+          echo "Virtual environment packages:"
+          ls -la venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+      
+      - name: Create deployment package
+        run: |
+          # Include both your code and the venv packages in the zip
+          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/
+          ln -s $(pwd)/venv/lib/python${{ env.PYTHON_VERSION }}/site-packages \
+                .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
+          zip -r release.zip . -x '*.git*' -x 'venv/bin/*' -x 'venv/include/*' -x 'venv/lib/python${{ env.PYTHON_VERSION }}/ensurepip' -x 'venv/lib/python${{ env.PYTHON_VERSION }}/distutils'
+                
       # Optional: Add step to run tests here
 
       - name: Zip artifact for deployment
