@@ -1,5 +1,3 @@
-# Docs for Azure Functions action: https://github.com/Azure/functions-action
-
 name: Build and deploy Python project to Azure Function App - createvm
 
 on:
@@ -9,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'deploy_dir' # Where deployment package will be extracted
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'deploy_dir'  # Where zip will be unzipped
   PYTHON_VERSION: '3.12'
 
 jobs:
@@ -29,6 +27,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Create and activate virtual environment
+        shell: bash
         run: |
           python -m venv venv
           source venv/bin/activate
@@ -36,18 +35,22 @@ jobs:
           pip install -r requirements.txt
 
       - name: Prepare Python dependencies for Azure Functions
+        shell: bash
         run: |
           mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
           cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
 
-      - name: Create deployment zip package
+      - name: Package app into release.zip
+        shell: bash
         run: |
           mkdir staging
           shopt -s extglob
-          cp -r !(staging|venv|.git|release.zip) staging/
+          cp -r !(venv|.git|staging|release.zip) staging/
           cp -r .python_packages staging/
+          cd staging
+          zip -r ../release.zip .
 
-      - name: Show contents of zip (debug)
+      - name: Show contents of release.zip
         run: |
           unzip -l release.zip
           echo "Zip file size: $(du -h release.zip | cut -f1)"
@@ -67,16 +70,17 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: python-app
+          path: .
 
-      - name: Unzip artifact for deployment
+      - name: Unzip artifact into deployment directory
         run: |
           mkdir -p ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          unzip python-app/release.zip -d ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          unzip release.zip -d ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
       - name: Deploy to Azure Functions
         uses: Azure/functions-action@v1
         with:
-          app-name: 'createvm' # Replace with your Function App name
+          app-name: 'createvm'  # Replace with your Function App name
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_0E89E86104924CEDBBC83ED8B62BB8B9 }}
