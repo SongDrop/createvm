@@ -36,7 +36,11 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-             cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
+
+      - name: Prepare .python_packages directory
+        run: |
+          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
+          cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
      
       # Optional: Add step to run tests here
 
