@@ -38,13 +38,18 @@ jobs:
 
       # Optional: Add step to run tests here
 
-      - name: Zip artifact for deployment
+      - name: Copy dependencies to site-packages
         run: |
-
           mkdir -p site-packages
-
           cp -r venv/lib/python3.12/site-packages/* site-packages/
 
+      - name: Zip artifact for deployment
+        run: |
+          zip release.zip function_app.py requirements.txt host.json site-packages -r
+
+      - name: Verify zip contents
+        run: unzip -l release.zip
+        
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
