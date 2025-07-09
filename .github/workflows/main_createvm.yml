@@ -40,19 +40,20 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt
           
-          # BLUNT FORCE COPY - this is what you're asking for
-          mkdir -p .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages
-          cp -r venv/lib/python${{ env.PYTHON_VERSION }}/site-packages/* .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-
-          # Verify the copy worked
-          echo "Copied packages:"
-          ls -la .python_packages/lib/python${{ env.PYTHON_VERSION }}/site-packages/
-
-      - name: Prepare Python dependencies
+      - name: Copy packages to .python_packages
         run: |
-          # Create the exact folder structure Azure Functions expects
-          mkdir -p .python_packages/lib/python3.12/site-packages
-          cp -r venv/lib/python3.12/site-packages/* .python_packages/lib/python3.12/site-packages/
+          # Use Python to find site-packages path
+          SITE_PACKAGES=$(./venv/bin/python -c "import site; print(site.getsitepackages()[0])")
+          echo "Using site-packages from: $SITE_PACKAGES"
+      
+          TARGET_DIR=".python_packages/lib/python3.11/site-packages"
+          mkdir -p "$TARGET_DIR"
+      
+          cp -r "$SITE_PACKAGES/"* "$TARGET_DIR/"
+      
+          echo "Copied packages:"
+          ls -la "$TARGET_DIR"
+
 
       # Optional: Add step to run tests here
 
