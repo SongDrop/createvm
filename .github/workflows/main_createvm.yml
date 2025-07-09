@@ -43,11 +43,10 @@ jobs:
       - name: Create deployment zip package
         run: |
           mkdir staging
-          cp -r ./* staging/
+          shopt -s extglob
+          cp -r !(staging|venv|.git|release.zip) staging/
           cp -r .python_packages staging/
-          cd staging
-          zip -r ../release.zip .
-      
+
       - name: Show contents of zip (debug)
         run: |
           unzip -l release.zip
