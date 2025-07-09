@@ -80,3 +80,5 @@ jobs:
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_CCFD531EEA2D4FD89D1020DC9C0B0A5D }}
           sku: "flexconsumption"
+          scm-do-build-during-deployment: false
+          enable-oryx-build: false
